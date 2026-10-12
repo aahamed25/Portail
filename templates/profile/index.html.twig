@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon profil{% endblock %}
+
+{% block styles %}
+    .header { display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1.5rem; }
+    .avatar {
+        width: 72px; height: 72px; border-radius: 50%; background: #2a5298; color: #fff;
+        display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: 700;
+    }
+    .header h1 { margin: 0; font-size: 1.5rem; }
+    .header p { margin: .2rem 0 0; color: #666; }
+    .badge { display: inline-block; padding: .2rem .6rem; border-radius: 999px; font-size: .75rem; font-weight: 600; }
+    .badge-admin { background: #fde8c8; color: #8a5200; }
+    .badge-user { background: #dbe7fb; color: #1e3c72; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .full { grid-column: 1 / -1; }
+    .row { display: flex; justify-content: space-between; padding: .6rem 0; border-bottom: 1px solid #eee; font-size: .95rem; }
+    .row:last-child { border-bottom: 0; }
+    .row span:first-child { color: #777; }
+    table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+    th { text-align: left; color: #777; font-weight: 600; padding: .5rem 0; border-bottom: 1px solid #e5e5e5; }
+    td { padding: .6rem 0; border-bottom: 1px solid #f0f0f0; }
+    .muted { color: #888; font-size: .9rem; }
+    @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+{% endblock %}
+
+{% block body %}
+    <div class="header">
+        <div class="avatar">{{ user.prenom|first|upper }}{{ user.nom|first|upper }}</div>
+        <div>
+            <h1>{{ user.prenom }} {{ user.nom }}</h1>
+            <p>
+                {{ user.email }}
+                {% if 'ROLE_ADMIN' in user.roles %}
+                    <span class="badge badge-admin">Administrateur</span>
+                {% else %}
+                    <span class="badge badge-user">Utilisateur</span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h2>Informations personnelles</h2>
+            <div class="row"><span>Nom</span><span>{{ user.nom }}</span></div>
+            <div class="row"><span>Prénom</span><span>{{ user.prenom }}</span></div>
+            <div class="row"><span>Adresse</span><span>{{ user.adresse }}</span></div>
+            <div class="row"><span>Ville</span><span>{{ user.ville }}</span></div>
+            <div class="row"><span>Code postal</span><span>{{ user.codePostal }}</span></div>
+        </div>
+
+        <div class="card">
+            <h2>Sécurité du compte</h2>
+            <div class="row"><span>Adresse e-mail</span><span>{{ user.email }}</span></div>
+            <div class="row"><span>Mot de passe</span><span>••••••••••••</span></div>
+            <div class="row">
+                <span>Dernière modification</span>
+                <span>
+                    {% set lastPwd = user.passwordHistories|first %}
+                    {{ lastPwd ? lastPwd.createdAt|date('d/m/Y à H:i') : 'Inconnue' }}
+                </span>
+            </div>
+            <div class="row"><span>Statut</span><span>{{ user.suspended ? 'Suspendu' : 'Actif' }}</span></div>
+            <p style="margin: 1.2rem 0 0;">
+                <a class="btn" href="{{ path('app_change_password') }}">Changer mon mot de passe</a>
+            </p>
+        </div>
+
+        <div class="card full">
+            <h2>Dernières connexions</h2>
+            {% if user.loginHistories|length > 0 %}
+                <table>
+                    <thead><tr><th>Date</th><th>Heure</th><th>Adresse IP</th></tr></thead>
+                    <tbody>
+                        {% for login in user.loginHistories|slice(0, 5) %}
+                            <tr>
+                                <td>{{ login.connectedAt|date('d/m/Y') }}</td>
+                                <td>{{ login.connectedAt|date('H:i:s') }}</td>
+                                <td>{{ login.ip ?? '-' }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="muted">Aucune connexion enregistrée pour le moment.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

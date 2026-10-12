@@ -1,0 +1,13 @@
+{% extends 'auth_base.html.twig' %}
+
+{% set active = 'register' %}
+
+{% block title %}Inscription{% endblock %}
+
+{% block content %}
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <p class="help">Mot de passe : 12 caractères minimum avec majuscule, minuscule, chiffre et caractère spécial.</p>
+        <button type="submit">Créer mon compte</button>
+    {{ form_end(form) }}
+{% endblock %}

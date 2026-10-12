@@ -1,0 +1,27 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block styles %}
+    .form-card { max-width: 560px; margin: 0 auto; }
+    .form-card h1 { margin: 0 0 .5rem; font-size: 1.4rem; }
+    .form-card div[id$="_roles"] label { display: inline-block; margin-right: 1rem; font-weight: 400; }
+    .form-card input[type=checkbox] { margin-right: .35rem; }
+{% endblock %}
+
+{% block body %}
+    <div class="card form-card">
+        <h1>{{ title }}</h1>
+
+        {{ form_start(form) }}
+            {{ form_widget(form) }}
+            <p style="font-size:.8rem; color:#777;">
+                Mot de passe : 12 caractères minimum avec majuscule, minuscule, chiffre et caractère spécial.
+            </p>
+            <p style="margin-top:1.2rem;">
+                <button class="btn" type="submit">Enregistrer</button>
+                <a class="btn btn-light" href="{{ path('admin_user_index') }}">Annuler</a>
+            </p>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

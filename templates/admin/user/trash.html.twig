@@ -1,0 +1,78 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Corbeille{% endblock %}
+
+{% block styles %}
+    .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+    .top h1 { margin: 0; font-size: 1.5rem; }
+    .top p { margin: .2rem 0 0; color: #666; font-size: .9rem; }
+    .alert-error { background: #f8d7da; color: #842029; }
+    .table-wrap { overflow-x: auto; }
+    table.users { width: 100%; border-collapse: collapse; font-size: .92rem; }
+    table.users th { text-align: left; color: #777; font-weight: 600; padding: .6rem; border-bottom: 2px solid #e5e5e5; white-space: nowrap; }
+    table.users td { padding: .7rem .6rem; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+    .actions { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .actions form { margin: 0; }
+    .btn-sm { padding: .35rem .7rem; font-size: .8rem; border-radius: 6px; }
+    .btn-ok { background: #d4edda; color: #0f5132; }
+    .btn-ok:hover { background: #bfe3c8; }
+    .btn-danger { background: #f8d7da; color: #842029; }
+    .btn-danger:hover { background: #f1bcc1; }
+    .muted { color: #888; font-size: .85rem; }
+{% endblock %}
+
+{% block body %}
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-error">{{ message }}</div>
+    {% endfor %}
+
+    <div class="top">
+        <div>
+            <h1>Corbeille</h1>
+            <p>{{ users|length }} compte(s) supprimé(s)</p>
+        </div>
+        <a class="btn btn-light" href="{{ path('admin_user_index') }}">Retour aux utilisateurs</a>
+    </div>
+
+    <div class="card">
+        {% if users|length > 0 %}
+            <div class="table-wrap">
+                <table class="users">
+                    <thead>
+                        <tr>
+                            <th>Utilisateur</th>
+                            <th>Supprimé le</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for u in users %}
+                        <tr>
+                            <td>
+                                <strong>{{ u.prenom }} {{ u.nom }}</strong><br>
+                                <span class="muted">{{ u.email }}</span>
+                            </td>
+                            <td>{{ u.deletedAt|date('d/m/Y à H:i') }}</td>
+                            <td>
+                                <div class="actions">
+                                    <form method="post" action="{{ path('admin_user_restore', {id: u.id}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('restore' ~ u.id) }}">
+                                        <button class="btn btn-ok btn-sm" type="submit">Restaurer</button>
+                                    </form>
+                                    <form method="post" action="{{ path('admin_user_purge', {id: u.id}) }}"
+                                          onsubmit="return confirm('Supprimer définitivement {{ u.prenom|e('js') }} {{ u.nom|e('js') }} ? Cette action est irréversible.');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('purge' ~ u.id) }}">
+                                        <button class="btn btn-danger btn-sm" type="submit">Supprimer définitivement</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="muted">La corbeille est vide.</p>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration des utilisateurs
+{% endblock %}
+
+{% block styles %}
+	.top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+			    .top h1 { margin: 0; font-size: 1.5rem; }
+			    .top p { margin: .2rem 0 0; color: #666; font-size: .9rem; }
+			    .alert-error { background: #f8d7da; color: #842029; }
+			    .table-wrap { overflow-x: auto; }
+			    table.users { width: 100%; border-collapse: collapse; font-size: .92rem; }
+			    table.users th { text-align: left; color: #777; font-weight: 600; padding: .6rem .6rem; border-bottom: 2px solid #e5e5e5; white-space: nowrap; }
+			    table.users td { padding: .7rem .6rem; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+			    .badge { display: inline-block; padding: .2rem .6rem; border-radius: 999px; font-size: .75rem; font-weight: 600; margin-right: .2rem; }
+			    .badge-admin { background: #fde8c8; color: #8a5200; }
+			    .badge-user { background: #dbe7fb; color: #1e3c72; }
+			    .badge-ok { background: #d4edda; color: #0f5132; }
+			    .badge-off { background: #f8d7da; color: #842029; }
+			    .actions { display: flex; gap: .4rem; flex-wrap: wrap; }
+			    .actions form { margin: 0; }
+			    .btn-sm { padding: .35rem .7rem; font-size: .8rem; border-radius: 6px; }
+			    .btn-warn { background: #fde8c8; color: #8a5200; }
+			    .btn-warn:hover { background: #f8d9a8; }
+			    .btn-danger { background: #f8d7da; color: #842029; }
+			    .btn-danger:hover { background: #f1bcc1; }
+			    details summary { cursor: pointer; color: #2a5298; font-weight: 600; }
+			    details ul { margin: .5rem 0 0; padding-left: 1.1rem; color: #444; max-height: 160px; overflow-y: auto; }
+			    details li { margin-bottom: .2rem; font-size: .85rem; }
+			    .muted { color: #888; font-size: .85rem; }
+{% endblock %}
+
+{% block body %}
+	{% for message in app.flashes('error') %}
+		<div class="alert alert-error">{{ message }}</div>
+	{% endfor %}
+
+	<div class="top">
+		<div>
+			<h1>Gestion des utilisateurs</h1>
+			<p>{{ users|length }}
+				compte(s) enregistré(s)</p>
+			<div style="display:flex; gap:.5rem;">
+				<a class="btn btn-light" href="{{ path('admin_user_trash') }}">Corbeille ({{ trashCount }})</a>
+				<a class="btn" href="{{ path('admin_user_new') }}">+ Ajouter un utilisateur</a>
+			</div>
+			<div class="card">
+				<div class="table-wrap">
+					<table class="users">
+						<thead>
+							<tr>
+								<th>Utilisateur</th>
+								<th>Contact</th>
+								<th>Rôle</th>
+								<th>Statut</th>
+								<th>Historique des connexions</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for u in users %}
+								<tr>
+									<td>
+										<strong>{{ u.prenom }}
+											{{ u.nom }}</strong><br>
+										<span class="muted">{{ u.email }}</span>
+									</td>
+									<td>
+										{{ u.adresse }}<br>
+										<span class="muted">{{ u.codePostal }}
+											{{ u.ville }}</span>
+									</td>
+									<td>
+										{% if 'ROLE_ADMIN' in u.roles %}
+											<span class="badge badge-admin">Administrateur</span>
+										{% else %}
+											<span class="badge badge-user">Utilisateur</span>
+										{% endif %}
+									</td>
+									<td>
+										{% if u.suspended %}
+											<span class="badge badge-off">Suspendu</span>
+										{% else %}
+											<span class="badge badge-ok">Actif</span>
+										{% endif %}
+									</td>
+									<td>
+										{% if u.loginHistories|length > 0 %}
+											<details>
+												<summary>{{ u.loginHistories|length }}
+													connexion(s)</summary>
+												<ul>
+													{% for l in u.loginHistories %}
+														<li>{{ l.connectedAt|date('d/m/Y à H:i:s') }}
+															{% if l.ip %}
+																<span class="muted">({{ l.ip }})</span>
+															{% endif %}
+														</li>
+													{% endfor %}
+												</ul>
+											</details>
+										{% else %}
+											<span class="muted">Aucune connexion</span>
+										{% endif %}
+									</td>
+									<td>
+										<div class="actions">
+											<a class="btn btn-light btn-sm" href="{{ path('admin_user_edit', {id: u.id}) }}">Modifier</a>
+
+											{% if u != app.user %}
+												<form method="post" action="{{ path('admin_user_suspend', {id: u.id}) }}">
+													<input type="hidden" name="_token" value="{{ csrf_token('suspend' ~ u.id) }}">
+													<button class="btn btn-warn btn-sm" type="submit">{{ u.suspended ? 'Réactiver' : 'Suspendre' }}</button>
+												</form>
+
+												<form action="{{ path('admin_user_delete', {id: u.id}) }}" method="post" onsubmit="return confirm('Mettre {{ u.prenom|e('js') }} {{ u.nom|e('js') }} à la corbeille ?');">
+													<input type="hidden" name="_token" value="{{ csrf_token('delete' ~ u.id) }}">
+													<button class="btn btn-danger btn-sm" type="submit">Supprimer</button>
+												</form>
+											{% else %}
+												<span class="muted">(vous)</span>
+											{% endif %}
+										</div>
+									</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		{% endblock %}

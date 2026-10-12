@@ -1,0 +1,14 @@
+{% extends 'auth_base.html.twig' %}
+
+{% block title %}Accueil{% endblock %}
+{% block tabs %}{% endblock %}
+
+{% block content %}
+    <p style="text-align:center; color:#555;">
+        Bienvenue sur le Portail. Connectez-vous ou créez un compte pour accéder à votre espace.
+    </p>
+    <p style="text-align:center;">
+        <a href="{{ path('app_login') }}" style="display:block; padding:.85rem; border-radius:8px; background:#2a5298; color:#fff; text-decoration:none; font-weight:600; margin-bottom:.75rem;">Se connecter</a>
+        <a href="{{ path('app_register') }}" style="display:block; padding:.85rem; border-radius:8px; background:#e8edf7; color:#1e3c72; text-decoration:none; font-weight:600;">Créer un compte</a>
+    </p>
+{% endblock %}

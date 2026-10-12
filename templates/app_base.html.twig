@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Portail{% endblock %}</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: system-ui, Arial, sans-serif; background: #f3f5f9; color: #222; }
+        nav {
+            background: #1e3c72; color: #fff; padding: 0 1.5rem; height: 60px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        nav .brand { font-weight: 700; font-size: 1.2rem; color: #fff; text-decoration: none; }
+        nav .links { display: flex; align-items: center; gap: 1.25rem; }
+        nav .links a { color: #cfd9ee; text-decoration: none; font-size: .95rem; }
+        nav .links a:hover { color: #fff; }
+        nav .logout { background: rgba(255,255,255,.15); padding: .4rem .9rem; border-radius: 6px; color: #fff !important; }
+        main { max-width: 960px; margin: 2rem auto; padding: 0 1.25rem; }
+        .alert { padding: .8rem 1rem; border-radius: 8px; margin-bottom: 1.25rem; font-size: .92rem; }
+        .alert-success { background: #d4edda; color: #0f5132; }
+        .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.06); padding: 1.5rem; }
+        .card h2 { margin: 0 0 1rem; font-size: 1.05rem; color: #1e3c72; }
+        .btn {
+            display: inline-block; padding: .65rem 1.1rem; border-radius: 8px; border: 0;
+            background: #2a5298; color: #fff; text-decoration: none; font-size: .95rem; font-weight: 600; cursor: pointer;
+        }
+        .btn:hover { background: #1e3c72; }
+        .btn-light { background: #e8edf7; color: #1e3c72; }
+        .btn-light:hover { background: #d7dff0; }
+        label { display: block; margin: .9rem 0 .3rem; font-size: .85rem; font-weight: 600; }
+        input[type=text], input[type=email], input[type=password] {
+            width: 100%; padding: .7rem .8rem; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem;
+        }
+        input:focus { outline: none; border-color: #2a5298; box-shadow: 0 0 0 3px rgba(42,82,152,.2); }
+        form ul { margin: .3rem 0 0; padding-left: 1.1rem; color: #b02a37; font-size: .85rem; }
+
+        .pw-wrap { position: relative; }
+        .pw-wrap input { padding-right: 2.8rem; }
+        button.pw-toggle {
+            position: absolute; top: 50%; right: .5rem; transform: translateY(-50%);
+            width: 2rem; height: 2rem; margin: 0; padding: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: transparent; color: #777; border: 0; border-radius: 6px; cursor: pointer;
+        }
+        button.pw-toggle:hover { background: #eef1f7; color: #1e3c72; }
+        button.pw-toggle svg { width: 20px; height: 20px; }
+
+        {% block styles %}{% endblock %}
+    </style>
+</head>
+<body>
+    <nav>
+        <a class="brand" href="{{ path('app_home') }}">Portail</a>
+        <div class="links">
+            <a href="{{ path('app_profile') }}">Mon profil</a>
+            {% if is_granted('ROLE_ADMIN') %}
+                <a href="{{ path('admin_user_index') }}">Administration</a>
+            {% endif %}
+            <a class="logout" href="{{ path('app_logout') }}">Déconnexion</a>
+        </div>
+    </nav>
+
+    <main>
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+        {% block body %}{% endblock %}
+    </main>
+
+    <script>
+        (function () {
+            var eyeOpen = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+            var eyeOff = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
+            document.querySelectorAll('input[type="password"]').forEach(function (input) {
+                var wrap = document.createElement('div');
+                wrap.className = 'pw-wrap';
+                input.parentNode.insertBefore(wrap, input);
+                wrap.appendChild(input);
+
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'pw-toggle';
+                btn.setAttribute('aria-label', 'Afficher le mot de passe');
+                btn.innerHTML = eyeOpen;
+                wrap.appendChild(btn);
+
+                btn.addEventListener('click', function () {
+                    var show = input.type === 'password';
+                    input.type = show ? 'text' : 'password';
+                    btn.innerHTML = show ? eyeOff : eyeOpen;
+                    btn.setAttribute('aria-label', show ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
