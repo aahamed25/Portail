@@ -1,0 +1,54 @@
+name: Tests
+
+# Lancé à l'ouverture et à chaque mise à jour d'une pull request vers main
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  tests:
+    name: Tests PHPUnit
+    runs-on: ubuntu-latest
+
+    # Base MySQL temporaire, créée pour ce job puis détruite :
+    # elle est indépendante des bases du nuage de développement et du nuage de test.
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: portail
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      APP_ENV: test
+      DATABASE_URL: "mysql://root:root@127.0.0.1:3306/portail?serverVersion=8.0&charset=utf8mb4"
+
+    steps:
+      - name: Récupérer le code du projet
+        uses: actions/checkout@v4
+
+      - name: Préparer PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'        # même version que sur votre nuage de développement (php -v)
+          extensions: mbstring, intl, pdo_mysql, xml, ctype, iconv
+          coverage: none
+
+      - name: Installer les dépendances
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Préparer la base de données de test
+        run: |
+          php bin/console doctrine:database:create --if-not-exists
+          php bin/console doctrine:migrations:migrate -n
+          php bin/console doctrine:fixtures:load -n
+
+      - name: Exécuter les tests automatisés
+        run: php bin/phpunit --testdox

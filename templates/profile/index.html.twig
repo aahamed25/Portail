@@ -50,7 +50,9 @@
             <div class="row"><span>Ville</span><span>{{ user.ville }}</span></div>
             <div class="row"><span>Code postal</span><span>{{ user.codePostal }}</span></div>
         </div>
-
+            <p style="margin: 1.2rem 0 0;">
+                <a class="btn btn-light" href="{{ path('app_profile_edit', {id: user.id}) }}">Modifier mes informations</a>
+            </p>
         <div class="card">
             <h2>Sécurité du compte</h2>
             <div class="row"><span>Adresse e-mail</span><span>{{ user.email }}</span></div>

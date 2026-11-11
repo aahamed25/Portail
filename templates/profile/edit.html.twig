@@ -1,0 +1,16 @@
+{% extends 'app_base.html.twig' %}
+
+{% block title %}Modifier le profil{% endblock %}
+
+{% block body %}
+    <div class="card" style="max-width: 520px; margin: 0 auto;">
+        <h2>Modifier le profil de {{ user.prenom }} {{ user.nom }}</h2>
+        {{ form_start(form) }}
+            {{ form_widget(form) }}
+            <p style="margin-top:1.2rem;">
+                <button class="btn" type="submit">Enregistrer</button>
+                <a class="btn btn-light" href="{{ path('app_profile') }}">Annuler</a>
+            </p>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}
